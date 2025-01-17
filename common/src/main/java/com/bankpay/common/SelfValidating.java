@@ -1,4 +1,4 @@
-package common;
+package com.bankpay.common;
 
 import jakarta.validation.*;
 

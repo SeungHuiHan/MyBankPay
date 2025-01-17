@@ -1,5 +1,6 @@
 package com.bankpay.membership.adapter.in.web;
 
+import com.bankpay.common.WebAdapter;
 import com.bankpay.membership.application.port.in.FindMembershipCommand;
 import com.bankpay.membership.application.port.in.FindMembershipUseCase;
 import com.bankpay.membership.application.port.in.RegisterMembershipCommand;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+@WebAdapter
 @RestController
 @RequiredArgsConstructor
 public class FindMembershipController {

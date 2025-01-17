@@ -1,2 +1,3 @@
 rootProject.name = 'MyBankPay'
 include 'member-service'
+include 'common'
