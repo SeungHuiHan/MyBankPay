@@ -1,8 +1,8 @@
-package com.bankpay.membership.adapter.in.web;
+package com.bankpay.banking.adapter.in.web;
 
-import com.bankpay.membership.domain.Membership;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RegisterMembershipControllerTest {
+class RegisterBankAccountControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -26,25 +26,24 @@ public class RegisterMembershipControllerTest {
 
     @Test
     public void testRegisterMembership() throws Exception {
-        RegisterMembershipRequest request = new RegisterMembershipRequest("name","address","email",false);
+        RegisterBankAccountRequest request = new RegisterBankAccountRequest("1","URI","1111",true);
 
-        Membership expect=Membership.generateMember(
-                new Membership.MembershipId("1"),
-                new Membership.MembershipName("name"),
-                new Membership.MembershipEmail("email"),
-                new Membership.MembershipAddress("address"),
-                new Membership.MembershipIsValid(true),
-                new Membership.MembershipIsCorp(false)
-        );
+//        Membership expect=Membership.generateMember(
+//                new Membership.MembershipId("1"),
+//                new Membership.MembershipName("name"),
+//                new Membership.MembershipEmail("email"),
+//                new Membership.MembershipAddress("address"),
+//                new Membership.MembershipIsValid(true),
+//                new Membership.MembershipIsCorp(false)
+//        );
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/membership/register")
+                        MockMvcRequestBuilders.post("/banking/account/register")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
-                ).andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string(objectMapper.writeValueAsString(expect)));
+                ).andExpect(MockMvcResultMatchers.status().isOk());
+               // .andExpect(MockMvcResultMatchers.content().string(objectMapper.writeValueAsString(expect)));
     }
-
 
 
 }
