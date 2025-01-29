@@ -1,7 +1,6 @@
 package com.bankpay.money.moneyservice.application.port.in;
 
 import com.bankpay.common.SelfValidating;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
