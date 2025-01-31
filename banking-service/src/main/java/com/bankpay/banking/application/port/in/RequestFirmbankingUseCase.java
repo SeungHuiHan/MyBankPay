@@ -4,5 +4,7 @@ import com.bankpay.banking.domain.FirmbankingRequest;
 
 
 public interface RequestFirmbankingUseCase {
-    FirmbankingRequest requestFirmbanking(FirmbankingRequestCommand command);
+    FirmbankingRequest requestFirmbanking(RequestFirmbankingCommand command);
+    void requestFirmbankingByEvent(RequestFirmbankingCommand command);
+
 }

@@ -4,10 +4,11 @@ import com.bankpay.common.CountDownLatchManager;
 import com.bankpay.common.RechargingMoneyTask;
 import com.bankpay.common.SubTask;
 import com.bankpay.common.UseCase;
+import com.bankpay.money.moneyservice.adapter.axon.command.IncreaseMemberMoneyCommand;
+import com.bankpay.money.moneyservice.adapter.axon.command.MemberMoneyCreatedCommand;
 import com.bankpay.money.moneyservice.adapter.out.persistence.MemberMoneyJpaEntity;
 import com.bankpay.money.moneyservice.adapter.out.persistence.MoneyChangingRequestMapper;
-import com.bankpay.money.moneyservice.application.port.in.IncreaseMoneyRequestCommand;
-import com.bankpay.money.moneyservice.application.port.in.IncreaseMoneyRequestUseCase;
+import com.bankpay.money.moneyservice.application.port.in.*;
 import com.bankpay.money.moneyservice.application.port.out.GetMembershipPort;
 import com.bankpay.money.moneyservice.application.port.out.IncreaseMoneyPort;
 import com.bankpay.money.moneyservice.application.port.out.SendRechargingMoneyTaskPort;
@@ -15,6 +16,7 @@ import com.bankpay.money.moneyservice.domain.MemberMoney;
 import com.bankpay.money.moneyservice.domain.MoneyChangingRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,12 +27,15 @@ import java.util.UUID;
 @UseCase
 @RequiredArgsConstructor
 @Transactional
-public class IncreaseMoneyRequestService implements IncreaseMoneyRequestUseCase {
+public class IncreaseMoneyRequestService implements IncreaseMoneyRequestUseCase, CreateMemberMoneyUseCase {
     private final CountDownLatchManager countDownLatchManager;
     private final SendRechargingMoneyTaskPort sendRechargingMoneyTaskPort;
     private final GetMembershipPort membershipPort;
     private final IncreaseMoneyPort increaseMoneyPort;
     private final MoneyChangingRequestMapper mapper;
+    private final CommandGateway commandGateway;
+    private final CreateMemberMoneyPort createMemberMoneyPort;
+    private final GetMemberMoneyPort getMemberMoneyPort;
 
     @Override
     public MoneyChangingRequest increaseMoneyRequest(IncreaseMoneyRequestCommand command) {
@@ -146,5 +151,67 @@ public class IncreaseMoneyRequestService implements IncreaseMoneyRequestUseCase 
         // 5. Consume ok, Logic
 
         return null;
+    }
+
+    @Override
+    public void createMemberMoney(CreateMemberMoneyCommand command) {
+        MemberMoneyCreatedCommand axonCommand = new MemberMoneyCreatedCommand(command.getMembershipId());
+        //command Gateway에 보냄
+        commandGateway.send(axonCommand).whenComplete((result,throwable)->{
+            if(throwable!=null){
+                //문제 발생
+                System.out.println("throwable = "+throwable.getMessage());
+                throw new RuntimeException(throwable);
+            }else{
+                System.out.println("result = "+result);
+                createMemberMoneyPort.createMemberMoney(
+                        new MemberMoney.MembershipId(command.getMembershipId()),
+                        new MemberMoney.MoneyAggregateIdentifier(result.toString())
+                );
+            }
+        });
+    }
+
+    @Override
+    public void increaseMoneyRequestByEvent(IncreaseMoneyRequestCommand command) {
+        MemberMoneyJpaEntity memberMoneyJpaEntity = getMemberMoneyPort.getMemberMoney(new MemberMoney.MembershipId(command.getTargetMembershipId()));
+        //String memberMoneyAggregateIdentifier = memberMoneyJpaEntity.getAggregateIdentifier();
+
+//        // Saga 의 시작을 나타내는 커맨드!
+//        // RechargingMoneyRequestCreateCommand
+//        commandGateway.send(new RechargingMoneyRequestCreateCommand(memberMoneyAggregateIdentifier,
+//                UUID.randomUUID().toString(),
+//                command.getTargetMembershipId(),
+//                command.getAmount())
+//        ).whenComplete(
+//                (result, throwable) -> {
+//                    if (throwable != null) {
+//                        throwable.printStackTrace();
+//                        throw new RuntimeException(throwable);
+//                    } else {
+//                        System.out.println("result = " + result); // aggregateIdentifier
+//                    }
+//                }
+//        );
+        String aggregateIdentifier = memberMoneyJpaEntity.getAggregateIdentifier();
+        // command
+        commandGateway.send(IncreaseMemberMoneyCommand.builder()
+                        .aggregateIdentifier(aggregateIdentifier)
+                        .membershipId(command.getTargetMembershipId())
+                        .amount(command.getAmount()).build())
+        .whenComplete(
+                (result, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                        throw new RuntimeException(throwable);
+                    } else {
+                        // Increase money -> money 증가
+                        System.out.println("increaseMoney result = " + result);
+                        increaseMoneyPort.increaseMoney(
+                                new MemberMoney.MembershipId(command.getTargetMembershipId())
+                                , command.getAmount());
+                    }
+                }
+        );
     }
 }

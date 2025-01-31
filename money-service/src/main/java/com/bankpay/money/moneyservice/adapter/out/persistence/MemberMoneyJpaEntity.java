@@ -18,15 +18,18 @@ public class MemberMoneyJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberMoneyId;
 
-    private String membershipId;
+    private Long membershipId;
 
     // 잔액
     private int balance;
 
+    private String aggregateIdentifier;
 
-    public MemberMoneyJpaEntity(String membershipId, int balance) {
+
+    public MemberMoneyJpaEntity(Long membershipId, int balance,String aggregateIdentifier) {
         this.membershipId = membershipId;
         this.balance = balance;
+        this.aggregateIdentifier = aggregateIdentifier;
     }
 
     @Override
@@ -35,6 +38,7 @@ public class MemberMoneyJpaEntity {
                 "memberMoneyId=" + memberMoneyId +
                 ", membershipId='" + membershipId + '\'' +
                 ", balance=" + balance +
+                ", aggregateIdentifier='" + aggregateIdentifier + '\'' +
                 '}';
     }
 }

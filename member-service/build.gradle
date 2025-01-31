@@ -46,6 +46,17 @@ dependencies {
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
 	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
 
+	// Protobuf 직렬화 관련 의존성
+	implementation 'com.google.protobuf:protobuf-java:3.25.1'
+
+	// gRPC 통신을 위한 의존성 추가
+	implementation 'io.grpc:grpc-netty:1.50.2'
+	implementation 'io.grpc:grpc-protobuf:1.50.2'
+	implementation 'io.grpc:grpc-stub:1.50.2'
+
+	implementation "org.axonframework:axon-spring-boot-starter:4.10.3"
+	implementation "org.axonframework:axon-configuration:4.10.3"
+
 }
 
 tasks.named('test') {

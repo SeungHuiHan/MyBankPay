@@ -8,4 +8,7 @@ public interface IncreaseMoneyRequestUseCase {
 
     //비동기
     MoneyChangingRequest increaseMoneyRequestAsync(IncreaseMoneyRequestCommand command);
+
+    void increaseMoneyRequestByEvent(IncreaseMoneyRequestCommand command);
+
 }

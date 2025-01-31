@@ -7,6 +7,7 @@ import com.bankpay.banking.domain.FirmbankingRequest;
 import com.bankpay.common.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @PersistenceAdapter
@@ -16,7 +17,8 @@ public class FirmbankingRequestPersistenceAdapter implements RequestFirmbankingP
     private final SpringDataFirmbankingRequestRepository requestFirmbankingRepository;
 
     @Override
-    public FirmbankingRequestJpaEntity createFirmbankingRequest(FirmbankingRequest.FromBankName fromBankName, FirmbankingRequest.FromBankAccountNumber fromBankAccountNumber, FirmbankingRequest.ToBankName toBankName, FirmbankingRequest.ToBankAccountNumber toBankAccountNumber, FirmbankingRequest.MoneyAmount moneyAmount, FirmbankingRequest.FirmbankingStatus firmbankingStatus) {
+    public FirmbankingRequestJpaEntity createFirmbankingRequest(FirmbankingRequest.FromBankName fromBankName, FirmbankingRequest.FromBankAccountNumber fromBankAccountNumber, FirmbankingRequest.ToBankName toBankName, FirmbankingRequest.ToBankAccountNumber toBankAccountNumber,
+                                                                FirmbankingRequest.MoneyAmount moneyAmount, FirmbankingRequest.FirmbankingStatus firmbankingStatus, FirmbankingRequest.FirmbankingAggregateIdentifier firmbankingAggregateIdentifier) {
         return requestFirmbankingRepository.save(new FirmbankingRequestJpaEntity(
                 fromBankName.getFromBankName(),
                 fromBankAccountNumber.getFromBankAccountNumber(),
@@ -24,7 +26,8 @@ public class FirmbankingRequestPersistenceAdapter implements RequestFirmbankingP
                 toBankAccountNumber.getToBankAccountNumber(),
                 moneyAmount.getMoneyAmount(),
                 firmbankingStatus.getFirmbankingStatus(),
-                UUID.randomUUID()
+                UUID.randomUUID(),
+                firmbankingAggregateIdentifier.getFirmbankingAggregateIdentifier()
                 )
 
         );
@@ -33,5 +36,15 @@ public class FirmbankingRequestPersistenceAdapter implements RequestFirmbankingP
     @Override
     public FirmbankingRequestJpaEntity modifyFirmbankingRequest(FirmbankingRequestJpaEntity entity) {
         return requestFirmbankingRepository.save(entity);
+    }
+
+    @Override
+    public FirmbankingRequestJpaEntity getFirmbankingRequest(FirmbankingRequest.FirmbankingAggregateIdentifier firmbankingAggregateIdentifier) {
+        List<FirmbankingRequestJpaEntity> entityList=requestFirmbankingRepository.findByAggregateIdentifier(firmbankingAggregateIdentifier.getFirmbankingAggregateIdentifier());
+        if(entityList.size()>=1) {
+            return entityList.get(0);
+        }
+
+        return null;
     }
 }

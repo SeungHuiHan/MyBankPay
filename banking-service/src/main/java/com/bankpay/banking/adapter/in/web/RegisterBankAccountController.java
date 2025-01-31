@@ -31,12 +31,12 @@ public class RegisterBankAccountController {
                 .bankAccountNumber(request.getBankAccountNumber())
                 .linkedStatusIsValid(request.isLinkedStatusIsValid())
                 .build();
-        RegisteredBankAccount registeredBankAccount=registerBankAccountUseCase.registerBankAccount(command);
-        if(registeredBankAccount==null){
-            //TODO: Error Handling
-            //throw new RuntimeException("등록 실패");
-            return null;
-        }
+//        RegisteredBankAccount registeredBankAccount=registerBankAccountUseCase.registerBankAccount(command);
+//        if(registeredBankAccount==null){
+//            //TODO: Error Handling
+//            //throw new RuntimeException("등록 실패");
+//            return null;
+//        }
 
         return registerBankAccountUseCase.registerBankAccount(command);
 

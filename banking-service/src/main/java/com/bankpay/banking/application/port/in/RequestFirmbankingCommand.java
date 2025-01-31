@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @Builder
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class FirmbankingRequestCommand extends SelfValidating<FirmbankingRequestCommand> {
+public class RequestFirmbankingCommand extends SelfValidating<RequestFirmbankingCommand> {
 
     @NotNull
     private final String fromBankName;
@@ -24,7 +24,7 @@ public class FirmbankingRequestCommand extends SelfValidating<FirmbankingRequest
     @NotNull
     private final int firmbankingStatus; //0:요청, 1: 완료. 2:실패
 
-    public FirmbankingRequestCommand(String fromBankName, String fromBankAccountNumber, String toBankName, String toBankAccountNumber, int moneyAmount, int firmbankingStatus) {
+    public RequestFirmbankingCommand(String fromBankName, String fromBankAccountNumber, String toBankName, String toBankAccountNumber, int moneyAmount, int firmbankingStatus) {
         this.fromBankName = fromBankName;
         this.fromBankAccountNumber = fromBankAccountNumber;
         this.toBankName = toBankName;

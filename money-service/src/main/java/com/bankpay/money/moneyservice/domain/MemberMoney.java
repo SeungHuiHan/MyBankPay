@@ -24,14 +24,10 @@ public class MemberMoney {
     //private final int linkedBankAccount;
 
 
-
-
-
     //이 클래스를 통하지 않고는 FirmbankingRequest이라는 객체를 만들 수 없다
     public static MemberMoney generateMemberMoney(MemberMoneyId memberMoneyId,
                                                   MembershipId membershipId,
                                                   Balance balance
-
 
           ) {
         return new MemberMoney(
@@ -67,9 +63,13 @@ public class MemberMoney {
         int balance;
     }
 
-
-
-
+    @Value
+    public static class MoneyAggregateIdentifier {
+        public MoneyAggregateIdentifier(String aggregateIdentifier) {
+            this.aggregateIdentifier = aggregateIdentifier;
+        }
+        String aggregateIdentifier ;
+    }
 
 
 }

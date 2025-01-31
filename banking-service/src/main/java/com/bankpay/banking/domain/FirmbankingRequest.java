@@ -27,6 +27,8 @@ public class FirmbankingRequest {
 
     private final UUID uuid; //
 
+    private final String aggregateIdentifier;
+
 
     //이 클래스를 통하지 않고는 FirmbankingRequest이라는 객체를 만들 수 없다
     public static FirmbankingRequest generateFirmbankingRequest(FirmbankingRequestId firmbankingRequestId,
@@ -36,18 +38,20 @@ public class FirmbankingRequest {
                                                                 ToBankAccountNumber toBankAccountNumber,
                                                                 MoneyAmount moneyAmount,
                                                                 FirmbankingStatus firmbankingStatus,
-                                                                UUID uuid
+                                                                UUID uuid,
+                                                                FirmbankingAggregateIdentifier firmbankingAggregateIdentifier
 
           ) {
         return new FirmbankingRequest(
-                firmbankingRequestId.firmbankingRequestId,
-                fromBankName.fromBankName,
-                fromBankAccountNumber.fromBankAccountNumber,
-                toBankName.toBankName,
-                toBankAccountNumber.toBankAccountNumber,
-                moneyAmount.moneyAmount,
-                firmbankingStatus.firmbankingStatus,
-                uuid
+                firmbankingRequestId.getFirmbankingRequestId(),
+                fromBankName.getFromBankName(),
+                fromBankAccountNumber.getFromBankAccountNumber(),
+                toBankName.getToBankName(),
+                toBankAccountNumber.getToBankAccountNumber(),
+                moneyAmount.getMoneyAmount(),
+                firmbankingStatus.getFirmbankingStatus(),
+                uuid,
+                firmbankingAggregateIdentifier.getFirmbankingAggregateIdentifier()
               );
     }
 
@@ -106,6 +110,14 @@ public class FirmbankingRequest {
             this.firmbankingStatus=value;
         }
         int firmbankingStatus;
+    }
+
+    @Value
+    public static class FirmbankingAggregateIdentifier{
+        public FirmbankingAggregateIdentifier(String value){
+            this.firmbankingAggregateIdentifier=value;
+        }
+        String firmbankingAggregateIdentifier;
     }
 
 
