@@ -27,7 +27,7 @@ public class MemberMoney {
     //이 클래스를 통하지 않고는 FirmbankingRequest이라는 객체를 만들 수 없다
     public static MemberMoney generateMemberMoney(MemberMoneyId memberMoneyId,
                                                   MembershipId membershipId,
-                                                  Balance balance
+                                                  MoneyBalance balance
 
           ) {
         return new MemberMoney(
@@ -56,8 +56,8 @@ public class MemberMoney {
     }
 
     @Value
-    public static class Balance{
-        public Balance(int value){
+    public static class MoneyBalance{
+        public MoneyBalance(int value){
             this.balance=value;
         }
         int balance;

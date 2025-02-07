@@ -1,6 +1,9 @@
 package com.bankpay.money.moneyservice.application.port.in;
 
+import com.bankpay.money.moneyservice.domain.MemberMoney;
 import com.bankpay.money.moneyservice.domain.MoneyChangingRequest;
+
+import java.util.List;
 
 
 public interface IncreaseMoneyRequestUseCase {
@@ -11,4 +14,5 @@ public interface IncreaseMoneyRequestUseCase {
 
     void increaseMoneyRequestByEvent(IncreaseMoneyRequestCommand command);
 
+    List<MemberMoney> findMemberMoneyListByMembershipIds(FindMemberMoneyListByMembershipIdsCommand command);
 }

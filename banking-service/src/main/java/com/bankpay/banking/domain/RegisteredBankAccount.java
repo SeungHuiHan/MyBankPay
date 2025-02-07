@@ -1,12 +1,15 @@
 package com.bankpay.banking.domain;
 
+import com.bankpay.banking.adapter.axon.aggregate.RegisteredBankAccountAggregate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
 
+
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE) //접근 제어자를 private하게 가져간다
+
 public class RegisteredBankAccount {
 
     private final String registeredBankAccountId;
@@ -19,13 +22,16 @@ public class RegisteredBankAccount {
 
     private final boolean linkedStatusIsValid;
 
+    private final String aggregateIdentifier;
+
 
     //이 클래스를 통하지 않고는 Membership이라는 객체를 만들 수 없다
     public static RegisteredBankAccount generateRegisteredBankAccount(RegisteredBankAccountId registeredBankAccountId,
     RegisteredBankAccount.MembershipId membershipId,
     RegisteredBankAccount.BankName bankName,
     RegisteredBankAccount.BankAccountNumber bankAccountNumber,
-    RegisteredBankAccount.LinkedStatusIsValid linkedStatusIsValid
+    RegisteredBankAccount.LinkedStatusIsValid linkedStatusIsValid,
+    RegisteredBankAccount.AggregateIdentifier aggregateIdentifier
 
           ) {
         return new RegisteredBankAccount(
@@ -33,7 +39,8 @@ public class RegisteredBankAccount {
                 membershipId.membershipId,
                 bankName.bankName,
                 bankAccountNumber.bankAccountNumber,
-                linkedStatusIsValid.linkedStatusIsValid
+                linkedStatusIsValid.linkedStatusIsValid,
+                aggregateIdentifier.getAggregateIdentifier()
               );
     }
 
@@ -78,5 +85,13 @@ public class RegisteredBankAccount {
         boolean linkedStatusIsValid;
     }
 
+
+    @Value
+    public static class AggregateIdentifier {
+        public AggregateIdentifier(String value) {
+            this.aggregateIdentifier = value;
+        }
+        String aggregateIdentifier;
+    }
 
 }

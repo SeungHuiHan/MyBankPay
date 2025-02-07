@@ -1,15 +1,15 @@
 package com.bankpay.money.moneyservice.adapter.in.web;
 
 import com.bankpay.common.WebAdapter;
-import com.bankpay.money.moneyservice.application.port.in.CreateMemberMoneyCommand;
-import com.bankpay.money.moneyservice.application.port.in.CreateMemberMoneyUseCase;
-import com.bankpay.money.moneyservice.application.port.in.IncreaseMoneyRequestCommand;
-import com.bankpay.money.moneyservice.application.port.in.IncreaseMoneyRequestUseCase;
+import com.bankpay.money.moneyservice.application.port.in.*;
+import com.bankpay.money.moneyservice.domain.MemberMoney;
 import com.bankpay.money.moneyservice.domain.MoneyChangingRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @WebAdapter
 @RestController
@@ -49,19 +49,14 @@ public class  RequestMoneyChangingController {
     }
 
 
-    @PostMapping("/money/decrease")
+    @PostMapping("/money/decrease-eda")
     public MoneyChangingResultDetail decreaseMoneyChangingRequest(@RequestBody IncreaseMoneyChangingRequest request) {
+        IncreaseMoneyRequestCommand command = IncreaseMoneyRequestCommand.builder()
+                .targetMembershipId(request.getTargetMembershipId())
+                .amount(request.getAmount()*-1) //사실상 감액
+                .build();
 
-//        FirmbankingRequestCommand command = FirmbankingRequestCommand.builder()
-//                .fromBankName(request.getFromBankName())
-//                .fromBankAccountNumber(request.getFromBankAccountNumber())
-//                .toBankName(request.getToBankName())
-//                .toBankAccountNumber(request.getToBankAccountNumber())
-//                .moneyAmount(request.getMoneyAmount())
-//                .build();
-//
-//        return decreaseMoneyRequestUseCase.decreaseMoneyRequest(command);
-
+        increaseMoneyRequestUseCase.increaseMoneyRequestByEvent(command);
         return null;
     }
 
@@ -111,5 +106,12 @@ public class  RequestMoneyChangingController {
         increaseMoneyRequestUseCase.increaseMoneyRequestByEvent(command);
     }
 
+    @PostMapping(path = "/money/member-money")
+    List<MemberMoney> findMemberMoneyListByMembershipIds(@RequestBody FindMemberMoneyListByMembershipIdsRequest request) {
+        FindMemberMoneyListByMembershipIdsCommand command = FindMemberMoneyListByMembershipIdsCommand.builder()
+                .membershipIds(request.getMembershipIds())
+                .build();
 
+        return increaseMoneyRequestUseCase.findMemberMoneyListByMembershipIds(command);
+    }
 }

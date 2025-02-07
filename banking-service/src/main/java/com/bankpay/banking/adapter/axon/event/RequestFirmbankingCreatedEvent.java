@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class FirmbankingRequestCreatedEvent {
+public class RequestFirmbankingCreatedEvent {
 
     private String fromBankName;
     private String fromBankAccountNumber;

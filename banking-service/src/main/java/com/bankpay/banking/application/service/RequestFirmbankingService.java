@@ -53,7 +53,8 @@ public class RequestFirmbankingService implements RequestFirmbankingUseCase, Upd
                 command.getFromBankName(),
                 command.getFromBankAccountNumber(),
                 command.getToBankName(),
-                command.getToBankAccountNumber()
+                command.getToBankAccountNumber(),
+                command.getMoneyAmount()
         ));
 
         //transactional UUID ,성공 실패 로깅 및 디버깅
@@ -102,25 +103,25 @@ public class RequestFirmbankingService implements RequestFirmbankingUseCase, Upd
                         );
 
                         // 은행에 펌뱅킹 요청
-//                        FirmbankingResult firmbankingResult = requestExternalFirmbankingPort.requestExternalFirmbanking(new ExternalFirmbankingRequest(
-//                                command.getFromBankName(),
-//                                command.getFromBankAccountNumber(),
-//                                command.getToBankName(),
-//                                command.getToBankAccountNumber(),
-//                                command.getMoneyAmount()
-//                        ));
-//
-//                        // 결과에 따라서 DB save
-//                        // 3. 결과에 따라서 1번에서 작성했던 FirmbankingRequest 정보를 Update
-//                        if (firmbankingResult.getResultCode() == 0){
-//                            // 성공
-//                            requestedEntity.setFirmbankingStatus(1);
-//                        } else {
-//                            // 실패
-//                            requestedEntity.setFirmbankingStatus(2);
-//                        }
-//
-//                        requestFirmbankingPort.modifyFirmbankingRequest(requestedEntity);
+                        FirmbankingResult firmbankingResult = requestExternalFirmbankingPort.requestExternalFirmbanking(new ExternalFirmbankingRequest(
+                                command.getFromBankName(),
+                                command.getFromBankAccountNumber(),
+                                command.getToBankName(),
+                                command.getToBankAccountNumber(),
+                                command.getMoneyAmount()
+                        ));
+
+                        // 결과에 따라서 DB save
+                        // 3. 결과에 따라서 1번에서 작성했던 FirmbankingRequest 정보를 Update
+                        if (firmbankingResult.getResultCode() == 0){
+                            // 성공
+                            requestedEntity.setFirmbankingStatus(1);
+                        } else {
+                            // 실패
+                            requestedEntity.setFirmbankingStatus(2);
+                        }
+
+                        requestFirmbankingPort.modifyFirmbankingRequest(requestedEntity);
                     }
                 }
         );

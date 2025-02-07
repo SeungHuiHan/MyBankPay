@@ -3,18 +3,20 @@ package com.bankpay.money.moneyservice.adapter.out.persistence;
 import com.bankpay.common.PersistenceAdapter;
 import com.bankpay.money.moneyservice.application.port.in.CreateMemberMoneyPort;
 import com.bankpay.money.moneyservice.application.port.in.GetMemberMoneyPort;
+import com.bankpay.money.moneyservice.application.port.out.GetMemberMoneyListPort;
 import com.bankpay.money.moneyservice.application.port.out.IncreaseMoneyPort;
 import com.bankpay.money.moneyservice.domain.MemberMoney;
 import com.bankpay.money.moneyservice.domain.MoneyChangingRequest;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @PersistenceAdapter
 @RequiredArgsConstructor
-public class MoneyChangingRequestPersistenceAdapter implements IncreaseMoneyPort, CreateMemberMoneyPort, GetMemberMoneyPort {
+public class MoneyChangingRequestPersistenceAdapter implements IncreaseMoneyPort, CreateMemberMoneyPort, GetMemberMoneyPort, GetMemberMoneyListPort {
 
     private final SpringDataMoneyChangingRequestRepository moneyChangingRequestRepository;
 
@@ -36,24 +38,21 @@ public class MoneyChangingRequestPersistenceAdapter implements IncreaseMoneyPort
     }
 
     @Override
-    public MemberMoneyJpaEntity increaseMoney(MemberMoney.MembershipId memberId, int increaseAmount) {
+    public MemberMoneyJpaEntity increaseMoney(MemberMoney.MembershipId memberId, int increaseMoneyAmount) {
         MemberMoneyJpaEntity entity;
-
         try {
-            List<MemberMoneyJpaEntity> entityList=memberMoneyRepository.findByMembershipId(Long.parseLong(memberId.getMembershipId()));
-            entity=entityList.get(0);
+            List<MemberMoneyJpaEntity> entityList =  memberMoneyRepository.findByMembershipId(Long.parseLong(memberId.getMembershipId()));
+            entity = entityList.get(0);
 
-            entity.setBalance(entity.getBalance()+increaseAmount);
-            return memberMoneyRepository.save(entity);
-        }catch (Exception e){
-
-            entity=new MemberMoneyJpaEntity(
+            entity.setBalance(entity.getBalance() + increaseMoneyAmount);
+            return  memberMoneyRepository.save(entity);
+        } catch (Exception e){
+            entity = new MemberMoneyJpaEntity(
                     Long.parseLong(memberId.getMembershipId()),
-                    increaseAmount,
-                    ""
+                    increaseMoneyAmount, ""
             );
-            return memberMoneyRepository.save(entity);
-
+            entity = memberMoneyRepository.save(entity);
+            return entity;
         }
 
 //        entity.setBalance(entity.getBalance()+increaseAmount);
@@ -83,5 +82,21 @@ public class MoneyChangingRequestPersistenceAdapter implements IncreaseMoneyPort
             return entity;
         }
         return  entityList.get(0);
+    }
+
+    @Override
+    public List<MemberMoneyJpaEntity> getMemberMoneyPort(List<String> membershipIds) {
+        // membershipIds 를 기준으로, 여러개의 MemberMoneyJpaEntity 를 가져온다.
+        return memberMoneyRepository.fineMemberMoneyListByMembershipIds(convertMembershipIds(membershipIds));
+    }
+
+
+    private List<Long> convertMembershipIds(List<String> membershipIds) {
+        List<Long> longList = new ArrayList<>();
+        // membershipIds 를 Long 타입의 List 로 변환한다.
+        for(String membershipId : membershipIds) {
+            longList.add(Long.parseLong(membershipId));
+        }
+        return longList;
     }
 }

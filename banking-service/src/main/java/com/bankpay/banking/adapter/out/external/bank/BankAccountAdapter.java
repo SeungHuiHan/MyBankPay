@@ -1,14 +1,9 @@
 package com.bankpay.banking.adapter.out.external.bank;
 
-import com.bankpay.banking.adapter.out.persistence.RegisteredBankAccountJpaEntity;
 import com.bankpay.banking.adapter.out.persistence.SpringDataRegisteredBankAccountRepository;
-import com.bankpay.banking.application.port.out.RegisterBankAccountPort;
 import com.bankpay.banking.application.port.out.RequestBankAccountInfoPort;
 import com.bankpay.banking.application.port.out.RequestExternalFirmbankingPort;
-import com.bankpay.banking.domain.FirmbankingRequest;
-import com.bankpay.banking.domain.RegisteredBankAccount;
 import com.bankpay.common.ExternalSystemAdapter;
-import com.bankpay.common.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 
 @ExternalSystemAdapter

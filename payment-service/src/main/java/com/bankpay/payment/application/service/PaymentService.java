@@ -1,0 +1,42 @@
+package com.bankpay.payment.application.service;
+
+import com.bankpay.common.UseCase;
+import com.bankpay.payment.application.port.in.RequestPaymentCommand;
+import com.bankpay.payment.application.port.in.RequestPaymentUseCase;
+import com.bankpay.payment.application.port.out.CreatePaymentPort;
+import com.bankpay.payment.application.port.out.GetMembershipPort;
+import com.bankpay.payment.application.port.out.GetRegisteredBankAccountPort;
+import com.bankpay.payment.domain.Payment;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@UseCase
+@RequiredArgsConstructor
+@Transactional
+public class PaymentService implements RequestPaymentUseCase {
+
+    private final CreatePaymentPort createPaymentPort;
+
+//    private final GetMembershipPort getMembershipPort;
+//    private final GetRegisteredBankAccountPort getRegisteredBankAccountPort;
+
+    // Todo Money Service -> Member Money 정보를 가져오기 위한 Port
+
+    @Override
+    public Payment requestPayment(RequestPaymentCommand command) {
+
+        // 충전도, 멤버십, 머니 유효성 확인.....
+        // getMembershipPort.getMembership(command.getRequestMembershipId());
+
+        //getRegisteredBankAccountPort.getRegisteredBankAccount(command.getRequestMembershipId());
+
+        //....
+
+        // createPaymentPort
+        return createPaymentPort.createPayment(
+                command.getRequestMembershipId(),
+                command.getRequestPrice(),
+                command.getFranchiseId(),
+                command.getFranchiseFeeRate());
+    }
+}

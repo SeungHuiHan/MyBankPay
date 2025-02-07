@@ -19,6 +19,7 @@ public class ExternalFirmbankingRequest {
 
     private String toBankAccountNumber;
 
+    private int amount;
 }
 
 

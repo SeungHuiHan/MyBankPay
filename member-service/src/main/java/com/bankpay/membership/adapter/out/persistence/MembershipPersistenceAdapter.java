@@ -7,6 +7,8 @@ import com.bankpay.membership.application.port.out.RegisterMembershipPort;
 import com.bankpay.membership.domain.Membership;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @PersistenceAdapter
 @RequiredArgsConstructor
 public class MembershipPersistenceAdapter implements RegisterMembershipPort , FindMembershipPort , ModifyMembershipPort {
@@ -39,5 +41,12 @@ public class MembershipPersistenceAdapter implements RegisterMembershipPort , Fi
         entity.setCorp(membershipIsCorp.isMembershipIsCorp());
         return membershipRepository.save(entity);
 
+    }
+
+    @Override
+    public List<MembershipJpaEntity> findMembershipListByAddress(Membership.MembershipAddress membershipAddress) {
+        // 관악구, 서초구, 강남구 중 하나
+        String address = membershipAddress.getMembershipAddress();
+        return membershipRepository.findByAddress(address);
     }
 }
