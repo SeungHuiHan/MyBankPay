@@ -21,22 +21,25 @@ public class Membership {
 
     private final boolean isCorp;
 
+    @Getter private final String refreshToken;
     //Membership
     //오염이 되면 안되는 클래스, 고객 정보, 핵심 도메인
 
     //이 클래스를 통하지 않고는 Membership이라는 객체를 만들 수 없다
     public static Membership generateMember(MembershipId membershipId
-            ,MembershipName membershipName
-            ,MembershipEmail membershipEmail
-            ,MembershipAddress membershipAddress
-            ,MembershipIsValid membershipIsValid
-            ,MembershipIsCorp membershipIsCorp) {
+            , MembershipName membershipName
+            , MembershipEmail membershipEmail
+            , MembershipAddress membershipAddress
+            , MembershipIsValid membershipIsValid
+            , MembershipIsCorp membershipIsCorp
+            , MembershipRefreshToken membershipRefreshToken) {
         return new Membership(membershipId.membershipId
                 ,membershipName.membershipName
                 ,membershipEmail.membershipEmail
                 ,membershipAddress.membershipAddress
                 ,membershipIsValid.membershipIsValid
-                ,membershipIsCorp.membershipIsCorp);
+                ,membershipIsCorp.membershipIsCorp
+                ,membershipRefreshToken.refreshToken);
     }
 
     //싱글톤
@@ -85,6 +88,14 @@ public class Membership {
             this.membershipIsCorp=value;
         }
         boolean membershipIsCorp;
+    }
+
+    @Value
+    public static class MembershipRefreshToken {
+        public MembershipRefreshToken(String value) {
+            this.refreshToken = value;
+        }
+        String refreshToken;
     }
 
 }

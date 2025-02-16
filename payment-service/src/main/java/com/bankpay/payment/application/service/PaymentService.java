@@ -1,6 +1,7 @@
 package com.bankpay.payment.application.service;
 
 import com.bankpay.common.UseCase;
+import com.bankpay.payment.application.port.in.FinishSettlementCommand;
 import com.bankpay.payment.application.port.in.RequestPaymentCommand;
 import com.bankpay.payment.application.port.in.RequestPaymentUseCase;
 import com.bankpay.payment.application.port.out.CreatePaymentPort;
@@ -10,15 +11,16 @@ import com.bankpay.payment.domain.Payment;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @UseCase
 @RequiredArgsConstructor
 @Transactional
 public class PaymentService implements RequestPaymentUseCase {
 
     private final CreatePaymentPort createPaymentPort;
-
-//    private final GetMembershipPort getMembershipPort;
-//    private final GetRegisteredBankAccountPort getRegisteredBankAccountPort;
+    private final GetMembershipPort getMembershipPort;
+    private final GetRegisteredBankAccountPort getRegisteredBankAccountPort;
 
     // Todo Money Service -> Member Money 정보를 가져오기 위한 Port
 
@@ -38,5 +40,15 @@ public class PaymentService implements RequestPaymentUseCase {
                 command.getRequestPrice(),
                 command.getFranchiseId(),
                 command.getFranchiseFeeRate());
+    }
+
+    @Override
+    public List<Payment> getNormalStatusPayments() {
+        return createPaymentPort.getNormalStatusPayments();
+    }
+
+    @Override
+    public void finishPayment(FinishSettlementCommand command) {
+        createPaymentPort.changePaymentRequestStatus(command.getPaymentId(), 2);
     }
 }

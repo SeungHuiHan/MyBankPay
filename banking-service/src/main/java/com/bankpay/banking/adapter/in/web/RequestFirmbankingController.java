@@ -20,7 +20,7 @@ public class RequestFirmbankingController {
     private final RequestFirmbankingUseCase requestFirmbankingUseCase;
     private final UpdateFirmbankingUseCase updateFirmbankingUseCase;
 
-    @PostMapping("/banking/firmbankibg/request")
+    @PostMapping("/banking/firmbanking/request")
     public FirmbankingRequest requestFirmbanking(@RequestBody RequestFirmbankingRequest request) {
 
         //request ~~

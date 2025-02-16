@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface SpringDataPaymentRepository extends JpaRepository<PaymentJpaEntity, Long> {
 
-
+    @Query("SELECT e  FROM PaymentJpaEntity e WHERE e.paymentStatus = :paymentStatus")
+    List<PaymentJpaEntity> findByPaymentStatus(@Param("paymentStatus") int paymentStatus);
 }

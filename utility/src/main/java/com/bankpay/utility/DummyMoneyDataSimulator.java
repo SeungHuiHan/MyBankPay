@@ -28,7 +28,7 @@ public class DummyMoneyDataSimulator {
         while (true) {
             //증액 머니, 감액 머니
             int amount = random.nextInt(20001) - 10000; // Random number between -100000 and 100000
-            int targetMembershipId = random.nextInt(1000) + 1; // Random number between 1 and 100000
+            int targetMembershipId = random.nextInt(10) + 1; // Random number between 1 and 100000
 
             registerAccountSimulator(REGISTER_ACCOUNT_API_ENDPOINT, targetMembershipId);
             createMemberMoneySimulator(CREATE_MONEY_API_ENDPOINT, targetMembershipId);
