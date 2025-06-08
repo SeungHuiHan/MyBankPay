@@ -1,12 +1,12 @@
 package com.bankpay.membership.application.service;
 
+import com.bankpay.common.UseCase;
 import com.bankpay.membership.adapter.out.persistence.MembershipJpaEntity;
 import com.bankpay.membership.adapter.out.persistence.MembershipMapper;
 import com.bankpay.membership.application.port.in.RegisterMembershipCommand;
 import com.bankpay.membership.application.port.in.RegisterMembershipUseCase;
 import com.bankpay.membership.application.port.out.RegisterMembershipPort;
 import com.bankpay.membership.domain.Membership;
-import common.UseCase;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

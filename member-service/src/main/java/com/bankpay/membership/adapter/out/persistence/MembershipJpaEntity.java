@@ -25,6 +25,17 @@ public class MembershipJpaEntity {
 
     private boolean isCorp;
 
+    private String refreshToken;
+
+    public MembershipJpaEntity(String name, String email, String address, boolean isValid, boolean isCorp,String refreshToken) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.isValid = isValid;
+        this.isCorp = isCorp;
+        this.refreshToken = refreshToken;
+    }
+
     @Override
     public String toString() {
         return "MembershipJpaEntity{" +
@@ -34,15 +45,12 @@ public class MembershipJpaEntity {
                 ", address='" + address + '\'' +
                 ", isValid=" + isValid +
                 ", isCorp=" + isCorp +
+                ", refreshToken='" + refreshToken + '\'' +
                 '}';
     }
 
-    public MembershipJpaEntity(String name, String email, String address, boolean isValid, boolean isCorp) {
-        this.name = name;
-        this.email = email;
-        this.address = address;
-        this.isValid = isValid;
-        this.isCorp = isCorp;
+    public MembershipJpaEntity clone() {
+        return new MembershipJpaEntity(this.membershipId, this.name, this.address, this.email, this.isValid, this.isCorp, this.refreshToken);
     }
 }
 

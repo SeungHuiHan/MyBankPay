@@ -37,3 +37,4 @@ out/
 .vscode/
 
 /src/main/resources/application.properties
+member-service/src/main/resources/application.properties

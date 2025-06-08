@@ -38,3 +38,7 @@ out/
 
 
 /src/main/resources/application.properties
+src/main/resources/application.properties
+/member-service/src/main/resources/application.properties
+/banking-service/src/main/resources/application.properties
+/common/src/main/resources/application.properties

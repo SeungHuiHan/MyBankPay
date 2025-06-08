@@ -1,0 +1,349 @@
+#version: '3'
+services:
+  axon-server:
+    container_name: axon-server
+    image: axoniq/axonserver:4.6.3-jdk-11-dev
+    networks:
+      - mybankpay_network
+    ports:
+      - "8024:8024"
+      - "8124:8124"
+    volumes:
+      - axonserver-data:/axonserver/data
+      - axonserver-events:/axonserver/events
+      - axonserver-config:/axonserver/config:ro
+
+  zookeeper:
+    image: 'bitnami/zookeeper:3.8'
+    networks:
+      - mybankpay_network
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_TLS_CLIENT_AUTH=none
+      - ZOO_TLS_QUORUM_CLIENT_AUTH=none
+
+  kafka:
+    image: 'bitnami/kafka:3.4.0'
+    networks:
+      - mybankpay_network
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      - BITNAMI_DEBUG=true
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=CONTROLLER://:9093,PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    networks:
+      - mybankpay_network
+    ports:
+      - "8989:8080"
+    restart: always
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+  mysql:
+    image: mysql:8.0
+    networks:
+      - mybankpay_network
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+      - ./db/data:/var/lib/mysql
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+    env_file: .env
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=Asia/Seoul
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+
+  membership-service:
+    image: mybankpay-member-service:1.0.8
+    networks:
+      - mybankpay_network
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mysql
+      - vault
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SPRING_CLOUD_VAULT_TOKEN=hvs.CAESIFVqkFKH5XsjOWtWwWbG8wuFtNqFxogC3UVNDa9wnqRBGh4KHGh2cy5PakF0clZVYmVIckpQVnBvMEhmRUh2ODE
+      - SPRING_CLOUD_VAULT_SCHEME=http
+      - SPRING_CLOUD_VAULT_HOST=vault
+      - SPRING_CLOUD_VAULT_PORT=8200
+
+
+
+  banking-service:
+    image: mybankpay-banking-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+
+
+  money-service:
+    image: mybankpay-money-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8083:8080"
+    depends_on:
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - TASK_TOPIC=mybankpay.task.topic
+      - TASK_RESULT_TOPIC=mybankpay.task.result.topic
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+
+  logging-consumer:
+    image: mybankpay-logging-consumer:1.0.0
+    networks:
+      - mybankpay_network
+    restart: always
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+
+  task-consumer:
+    image: mybankpay-task-consumer:1.0.0
+    networks:
+      - mybankpay_network
+    restart: always
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - TASK_TOPIC=mybankpay.task.topic
+      - TASK_RESULT_TOPIC=mybankpay.task.result.topic
+
+
+  remittance-service:
+    image: mybankpay-remittance-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8084:8080"
+    restart: always
+    depends_on:
+      - kafka
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+      - SERVICE_MONEY_URL=http://money-service:8080
+
+  payment-service:
+    image: mybankpay-payment-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8085:8080"
+    restart: always
+    depends_on:
+      - kafka
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+
+  money-aggregation-service:
+    image: mybankpay-money-aggregation-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8086:8080"
+    restart: always
+    depends_on:
+      - kafka
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+      - SERVICE_MONEY_URL=http://money-service:8080
+
+#  money-query-service:
+#    image: mybankpay-money-query-service:1.0.0
+#    networks:
+#      - mybankpay_network
+#    ports:
+#      - "8087:8080"
+#    restart: always
+#    depends_on:
+#      - kafka
+#      - mysql
+#    environment:
+#      - AXON_AXONSERVER_SERVERS=axon-server:8124
+#      - AXON_SERIALIZER_EVENTS=jackson
+#      - AXON_SERIALIZER_MESSAGES=jackson
+#      - AXON_SERIALIZER_GENERAL=xstream
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+#      - SPRING_DATASOURCE_USERNAME=mysqluser
+#      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+#      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+#      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+#      - LOGGING_TOPIC=mybank.logging.out.stdout
+#      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+#      - SERVICE_BANKING_URL=http://banking-service:8080
+#      - SERVICE_MONEY_URL=http://money-service:8080
+
+  settlement-service:
+    image: mybankpay-settlement-service:1.0.0
+    networks:
+      - mybankpay_network
+    ports:
+      - "8088:8080"
+    restart: always
+    depends_on:
+      - kafka
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mybankpay?useSSL=false&allowPublicKeyRetrieval=TRUE
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
+      - KAFKA_CLUSTERS_BOOTSTRAPSERVERS=kafka:29092
+      - LOGGING_TOPIC=mybank.logging.out.stdout
+      - SERVICE_MEMBERSHIP_URL=http://membership-service:8080
+      - SERVICE_BANKING_URL=http://banking-service:8080
+      - SERVICE_MONEY_URL=http://money-service:8080
+      - SERVICE_PAYMENT_URL=http://payment-service:8080
+
+
+  vault:
+    image: vault:1.13.1
+    networks:
+      - mybankpay_network
+    container_name: vault
+    ports:
+      - "8200:8200"
+    restart: always
+    cap_add:
+      - IPC_LOCK
+
+
+volumes:
+  axonserver-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/data
+  axonserver-events:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/events
+  axonserver-config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/config
+
+networks:
+  mybankpay_network:
+    driver: bridge
