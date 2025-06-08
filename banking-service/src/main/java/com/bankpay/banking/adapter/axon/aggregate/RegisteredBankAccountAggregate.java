@@ -45,7 +45,7 @@ public class RegisteredBankAccountAggregate {
 
         // Check! Registerd Bank Account
         BankAccount account = bankAccountInfoPort.getBankAccountInfo(new GetBankAccountRequest(command.getBankName(), command.getBankAccountNumber()));
-        boolean isValidAccount = account.isValid();
+        boolean isValidAccount = account.isValid(); //계좌번호 정상인지 확인
         // 🚨 여기가 실행되는지 로그 추가 필요!
         String firmbankingUUID = UUID.randomUUID().toString();
 

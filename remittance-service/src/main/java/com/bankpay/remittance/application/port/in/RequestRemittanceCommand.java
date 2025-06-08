@@ -26,7 +26,7 @@ public class RequestRemittanceCommand extends SelfValidating<RequestRemittanceCo
     private int remittanceType; // 0: membership(내부 고객), 1: bank (외부 은행 계좌)
     // 송금요청 금액
     @NotNull
-    @NotBlank
+//    @NotBlank
     private int amount;
 
 

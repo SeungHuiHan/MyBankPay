@@ -23,6 +23,12 @@ public class FindRemittanceHistoryController {
                 .membershipId(membershipId)
                 .build();
 
+
+        try {
+            Thread.sleep(20000); //20초
+        }catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         return findRemittanceUseCase.findRemittanceHistory(command);
     }
 }
